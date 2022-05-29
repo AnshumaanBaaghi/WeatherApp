@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      body {
+        background-color: whitesmoke;
+        font-family: sans-serif;
+        background-image: url("https://media.istockphoto.com/photos/blue-sky-and-white-clouds-background-picture-id825778252?b=1&k=20&m=825778252&s=170667a&w=0&h=jdnxK2NDwfdGvzzK3PTExB49HwLtrEZu27aB5qp_uxg=");
+        background-size: 100%;
+      }
+
+      #nav {
+        text-align: center;
+      }
+
+      #city {
+        width: 200px;
+        height: 30px;
+        border-radius: 10px;
+        outline: none;
+        border: solid 0.5px;
+        box-sizing: border-box;
+        text-align: center;
+      }
+
+      button {
+        width: 100px;
+        height: 30px;
+        border-radius: 10px;
+        outline: none;
+        border: solid 0.5px;
+        color: white;
+        font-weight: bold;
+        font-size: 14px;
+        background-color: rgb(243, 177, 53);
+        margin-top: 20px;
+      }
+
+      #container {
+        display: flex;
+        align-items: center;
+        margin-top: 150px;
+        justify-content: space-around;
+        align-items: flex-start;
+      }
+
+      #info {
+        font-size: 10px;
+        display: flex;
+      }
+      #info > div {
+        overflow: hidden;
+        box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+        border-radius: 10px;
+        background-color: white;
+        width: 130px;
+        margin-right: 10px;
+      }
+
+      iframe {
+        width: 350px;
+        height: 350px;
+        border: none;
+      }
+
+      p {
+        margin: 5px 10px 5px 10px;
+      }
+
+      img {
+        width: 100%;
+        /* height: 100px; */
+        padding-bottom: 10px;
+        border-bottom: solid gray 0.1px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="nav">
+      <input id="city" type="text" placeholder="City Name" />
+      <button onclick="SearchCity()">Search</button>
+    </div>
+    <div id="container">
+      <div id="info"></div>
+      <iframe id="map" loading="lazy" allowfullscreen> </iframe>
+    </div>
+  </body>
+</html>
+<script>
+  async function SearchCity() {
+    try {
+      let name = document.getElementById("city").value;
+      let map = document.getElementById("map");
+      map.setAttribute(
+        "src",
+        `https://maps.google.com/maps?q=${name}&t=&z=13&ie=UTF8&iwloc=&output=embed`
+      );
+      let url = `https://api.openweathermap.org/data/2.5/weather?q=${name}&appid=57dfc75184fae1729b48c8fa4b7393cf&units=metric`;
+      let promise = await fetch(url);
+      let data = await promise.json();
+      let lon = data.coord.lon;
+      let lat = data.coord.lat;
+      let url2 = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=&appid=57dfc75184fae1729b48c8fa4b7393cf&units=metric`;
+      let promise2 = await fetch(url2);
+      let data2 = await promise2.json();
+      // console.log(data2.daily);
+      weather(data2.daily);
+    } catch (error) {}
+  }
+
+  function weather(data) {
+    let div = document.querySelector("#info");
+    div.innerHTML = null;
+    for (let i = 0; i < 7; i++) {
+      let div2 = document.createElement("div");
+      console.log(data[i]);
+      let minTem = document.createElement("p");
+      minTem.innerText = `Min Temp: ${data[i].temp.min}°C`;
+      // console.log("data[i].main.temp_min:", data[i].main.temp_min);
+      var img = document.createElement("img");
+      if (data[i].temp.min > 25) {
+        img.src =
+          "https://www.pngitem.com/pimgs/m/9-99892_simple-weather-icons-sunny-sunny-weather-icon-png.png";
+      } else if (data[i].temp.min > 23) {
+        img.src =
+          "https://www.pncguam.com/wp-content/uploads/2017/09/sunny.jpg";
+      } else if (data[i].temp.min > 22) {
+        img.src =
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSiW1dwVi31Zwbf-QJ8kMZaXdPGHcIPkdBNeA&usqp=CAU";
+        img.style.height = "100px";
+      } else {
+        img.src =
+          "https://www.kindpng.com/picc/m/5-59720_clouds-cloudy-overcast-weather-forecast-night-cloudy-weather.png";
+      }
+      let maxTem = document.createElement("p");
+      maxTem.innerText = `Max Temp: ${data[i].temp.max}°C`;
+      let wind = document.createElement("p");
+      wind.innerText = `Wind: ${data[i].wind_speed}`;
+      let sunrise = document.createElement("p");
+      sunrise.innerText = `Sun Rise: ${data[i].sunrise}`;
+      let sunset = document.createElement("p");
+      sunset.innerText = `Sun Set: ${data[i].sunset}`;
+      let cloud = document.createElement("p");
+      cloud.innerText = `Cloud: ${data[i].weather[0].description}`;
+
+      div2.append(img, minTem, maxTem, wind, sunrise, sunset, cloud);
+      div.append(div2);
+    }
+  }
+</script>
